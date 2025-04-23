@@ -1,6 +1,19 @@
-#!/usr/bin/env node
 import { config } from "dotenv";
-config();
+import path from "path";
+
+// process.argv[1] is the absolute path to your running bundle (e.g. .../dist/mcp-bundled.js)
+const scriptPath = process.argv[1]!;
+const scriptDir = path.dirname(scriptPath);
+
+// assume your .env lives one level up from dist/, i.e. project root
+const envPath = path.resolve(scriptDir, "../.env");
+
+const result = config({ path: envPath });
+if (result.error) {
+  console.error("❌ dotenv failed to load from", envPath, result.error);
+} else {
+  console.error("✅ dotenv loaded from", envPath);
+}
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";

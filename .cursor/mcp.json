@@ -3,8 +3,7 @@
     "canvas-mcp": {
       "command": "canvas-mcp-server",
       "args": [],
-      "cwd": "${workspaceFolder}",
-      "env": "${workspaceFolder}/dotenv"
+      "cwd": "${workspaceFolder}"
     }
   }
 }
