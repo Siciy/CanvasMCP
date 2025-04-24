@@ -24,6 +24,12 @@ import { z } from "zod";
 import { getCourses, GetCoursesSchema } from "./operations/courses.js";
 import { getCourseContent, GetCourseContentSchema } from "./operations/courseContent.js";
 import { getCourseAssignments, GetCourseAssignmentsSchema, getAssignmentDetails, GetAssignmentDetailsSchema } from "./operations/assignments.js";
+import { getCoursePages, GetCoursePagesSchema, getPageContent, GetPageContentSchema } from "./operations/pages.js";
+import { getCourseFiles, GetCourseFilesSchema, getFolderFiles, GetFolderFilesSchema } from "./operations/files.js";
+import { getCourseDiscussionTopics, GetCourseDiscussionTopicsSchema, getTopicEntries, GetTopicEntriesSchema } from "./operations/discussions.js";
+import { getCourseStudents, GetCourseStudentsSchema } from "./operations/users.js";
+import { getAssignmentSubmissions, GetAssignmentSubmissionsSchema } from "./operations/submissions.js";
+import { getCourseQuizzes, GetCourseQuizzesSchema, getQuizSubmissions, GetQuizSubmissionsSchema } from "./operations/quizzes.js";
 import { CanvasAPIError } from "./common/utils.js";
 
 async function main() {
@@ -49,9 +55,59 @@ async function main() {
         description: "List all assignments in a course",
         inputSchema: zodToJsonSchema(GetCourseAssignmentsSchema)
       },
-      { name: "get_assignment_details",
+      {
+        name: "get_assignment_details",
         description: "Get details for a specific assignment",
         inputSchema: zodToJsonSchema(GetAssignmentDetailsSchema)
+      },
+      {
+        name: "get_course_pages",
+        description: "List course pages",
+        inputSchema: zodToJsonSchema(GetCoursePagesSchema)
+      },
+      {
+        name: "get_page_content",
+        description: "Get page content",
+        inputSchema: zodToJsonSchema(GetPageContentSchema)
+      },
+      { name: "get_course_files",
+        description: "List course files",
+        inputSchema: zodToJsonSchema(GetCourseFilesSchema)
+      },
+      {
+        name: "get_folder_files",
+        description: "List folder files",
+        inputSchema: zodToJsonSchema(GetFolderFilesSchema) 
+      },
+      { 
+        name: "get_course_discussion_topics",
+        description: "List discussion topics",
+        inputSchema: zodToJsonSchema(GetCourseDiscussionTopicsSchema) 
+      },
+      { 
+        name: "get_topic_entries",
+        description: "Get discussion entries",
+        inputSchema: zodToJsonSchema(GetTopicEntriesSchema) 
+      },
+      { 
+        name: "get_course_students",
+        description: "List students in course",
+        inputSchema: zodToJsonSchema(GetCourseStudentsSchema) 
+      },
+      { 
+        name: "get_assignment_submissions",
+        description: "List assignment submissions",
+        inputSchema: zodToJsonSchema(GetAssignmentSubmissionsSchema) 
+      },
+      { 
+        name: "get_course_quizzes",
+        description: "List course quizzes",
+        inputSchema: zodToJsonSchema(GetCourseQuizzesSchema) 
+      },
+      { 
+        name: "get_quiz_submissions",
+        description: "List quiz submissions",
+        inputSchema: zodToJsonSchema(GetQuizSubmissionsSchema) 
       },
     ],
   }));
@@ -64,23 +120,59 @@ async function main() {
     try {
       switch (name) {
         case "get_courses": {
-          const parsed = GetCoursesSchema.parse(args);
-          text = await getCourses(parsed);
+          text = await getCourses(GetCoursesSchema.parse(args));
           break;
         }
         case "get_course_content": {
-          const parsed = GetCourseContentSchema.parse(args);
-          text = await getCourseContent(parsed);
+          text = await getCourseContent(GetCourseContentSchema.parse(args));
           break;
         }
         case "get_course_assignments": {
-          const parsed = GetCourseAssignmentsSchema.parse(args);
-          text = await getCourseAssignments(parsed);
+          text = await getCourseAssignments(GetCourseAssignmentsSchema.parse(args));
           break;
         }
         case "get_assignment_details": {
-          const parsed = GetAssignmentDetailsSchema.parse(args);
-          text = await getAssignmentDetails(parsed);
+          text = await getAssignmentDetails(GetAssignmentDetailsSchema.parse(args));
+          break;
+        }
+        case "get_course_pages": {
+          text = await getCoursePages(GetCoursePagesSchema.parse(args));
+          break;
+        }
+        case "get_page_content": {
+          text = await getPageContent(GetPageContentSchema.parse(args));
+          break;
+        }
+        case "get_course_files": {
+          text = await getCourseFiles(GetCourseFilesSchema.parse(args));
+          break;
+        }
+        case "get_folder_files": {
+          text = await getFolderFiles(GetFolderFilesSchema.parse(args));
+          break;
+        }
+        case "get_course_discussion_topics": {
+          text = await getCourseDiscussionTopics(GetCourseDiscussionTopicsSchema.parse(args));
+          break;
+        }
+        case "get_topic_entries": {
+          text = await getTopicEntries(GetTopicEntriesSchema.parse(args));
+          break;
+        }
+        case "get_course_students": {
+          text = await getCourseStudents(GetCourseStudentsSchema.parse(args));
+          break;
+        }
+        case "get_assignment_submissions": {
+          text = await getAssignmentSubmissions(GetAssignmentSubmissionsSchema.parse(args));
+          break;
+        }
+        case "get_course_quizzes": {
+          text = await getCourseQuizzes(GetCourseQuizzesSchema.parse(args));
+          break;
+        }
+        case "get_quiz_submissions": {
+          text = await getQuizSubmissions(GetQuizSubmissionsSchema.parse(args));
           break;
         }
         default:
