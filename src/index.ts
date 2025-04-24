@@ -1,18 +1,15 @@
 import { config } from "dotenv";
 import path from "path";
 
-// process.argv[1] is the absolute path to your running bundle (e.g. .../dist/mcp-bundled.js)
 const scriptPath = process.argv[1]!;
 const scriptDir = path.dirname(scriptPath);
-
-// assume your .env lives one level up from dist/, i.e. project root
 const envPath = path.resolve(scriptDir, "../.env");
 
 const result = config({ path: envPath });
 if (result.error) {
-  console.error("❌ dotenv failed to load from", envPath, result.error);
+  console.error("dotenv failed to load from", envPath, result.error);
 } else {
-  console.error("✅ dotenv loaded from", envPath);
+  console.error("dotenv loaded from", envPath);
 }
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -25,6 +22,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
 
 import { getCourses, GetCoursesSchema } from "./operations/courses.js";
+import { getCourseContent, GetCourseContentSchema } from "./operations/courseContent.js";
 import { CanvasAPIError } from "./common/utils.js";
 
 async function main() {
@@ -33,7 +31,6 @@ async function main() {
     { capabilities: { tools: {} } }
   );
 
-  // Advertise our tool in ListTools
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
       {
@@ -41,23 +38,29 @@ async function main() {
         description: "List all courses for the current user",
         inputSchema: zodToJsonSchema(GetCoursesSchema),
       },
+      {
+        name: "get_course_content",
+        description: "Retrieve the modules and items for a specified course",
+        inputSchema: zodToJsonSchema(GetCourseContentSchema),
+      },
     ],
   }));
 
-  // Handle invocations; ALWAYS return { content: [...] }
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     const { name, arguments: argsRaw } = req.params;
     const args = (argsRaw ?? {}) as Record<string, unknown>;
 
     let text: string;
     try {
-      if (name !== "get_courses") {
+      if (name === "get_courses") {
+        GetCoursesSchema.parse(args);
+        text = await getCourses(args);
+      } else if (name === "get_course_content") {
+        const { course_id } = GetCourseContentSchema.parse(args);
+        text = await getCourseContent({ course_id });
+      } else {
         throw new Error(`Unknown tool: ${name}`);
       }
-      // validate
-      GetCoursesSchema.parse(args);
-      // run your logic
-      text = await getCourses(args);
     } catch (err) {
       if (err instanceof z.ZodError) {
         text = `Invalid input: ${JSON.stringify(err.errors)}`;
@@ -70,7 +73,6 @@ async function main() {
       }
     }
 
-    // Always include a content array
     return {
       content: [
         { type: "text", text }
@@ -78,8 +80,7 @@ async function main() {
     };
   });
 
-  // Log banners on stderr so stdout stays JSON-clean
-  console.error("🚀 Starting Canvas MCP server…");
+  console.error("Starting Canvas MCP server…");
 
   const transport = new StdioServerTransport();
   server.connect(transport).catch((err) => {
@@ -87,7 +88,7 @@ async function main() {
     process.exit(1);
   });
 
-  console.error("✅ Canvas MCP server started—listening on STDIO");
+  console.error("Canvas MCP server started—listening on STDIO");
   process.stdin.resume();
 }
 
