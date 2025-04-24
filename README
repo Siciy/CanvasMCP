@@ -5,6 +5,7 @@ This is a MCP server that interacts with Canvas through API calls.
 The goal is to ask LLMs more specific and tailored quesitons by directly pulling from course materials.
 
 Instructions to run:
+  - Install node.js
   - Download Node Package Manager (NPM)
   - From terminal: npm install; npm run dev
   - Server should start up, must refresh cursor

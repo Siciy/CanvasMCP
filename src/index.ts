@@ -23,6 +23,7 @@ import { z } from "zod";
 
 import { getCourses, GetCoursesSchema } from "./operations/courses.js";
 import { getCourseContent, GetCourseContentSchema } from "./operations/courseContent.js";
+import { getCourseAssignments, GetCourseAssignmentsSchema, getAssignmentDetails, GetAssignmentDetailsSchema } from "./operations/assignments.js";
 import { CanvasAPIError } from "./common/utils.js";
 
 async function main() {
@@ -43,6 +44,15 @@ async function main() {
         description: "Retrieve the modules and items for a specified course",
         inputSchema: zodToJsonSchema(GetCourseContentSchema),
       },
+      {
+        name: "get_course_assignments",
+        description: "List all assignments in a course",
+        inputSchema: zodToJsonSchema(GetCourseAssignmentsSchema)
+      },
+      { name: "get_assignment_details",
+        description: "Get details for a specific assignment",
+        inputSchema: zodToJsonSchema(GetAssignmentDetailsSchema)
+      },
     ],
   }));
 
@@ -52,14 +62,29 @@ async function main() {
 
     let text: string;
     try {
-      if (name === "get_courses") {
-        GetCoursesSchema.parse(args);
-        text = await getCourses(args);
-      } else if (name === "get_course_content") {
-        const { course_id } = GetCourseContentSchema.parse(args);
-        text = await getCourseContent({ course_id });
-      } else {
-        throw new Error(`Unknown tool: ${name}`);
+      switch (name) {
+        case "get_courses": {
+          const parsed = GetCoursesSchema.parse(args);
+          text = await getCourses(parsed);
+          break;
+        }
+        case "get_course_content": {
+          const parsed = GetCourseContentSchema.parse(args);
+          text = await getCourseContent(parsed);
+          break;
+        }
+        case "get_course_assignments": {
+          const parsed = GetCourseAssignmentsSchema.parse(args);
+          text = await getCourseAssignments(parsed);
+          break;
+        }
+        case "get_assignment_details": {
+          const parsed = GetAssignmentDetailsSchema.parse(args);
+          text = await getAssignmentDetails(parsed);
+          break;
+        }
+        default:
+          throw new Error(`Unknown tool: ${name}`);
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
